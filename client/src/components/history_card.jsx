@@ -41,7 +41,7 @@ const history = [
         classroomName: "TR1",
         startTime: DateTime.now(),
         endTime: DateTime.now().plus({ hour: 1 }),
-        purpose: "Sex",
+        purpose: "Event",
         logs: [DateTime.now()],
     },
     {
@@ -49,7 +49,7 @@ const history = [
         classroomName: "LT1",
         startTime: DateTime.now().minus({ hour: 2 }),
         endTime: DateTime.now(),
-        purpose: "Sex",
+        purpose: "Aether",
         logs: [DateTime.now().minus({ hour: 2 }), DateTime.now()],
     },
 ];
