@@ -26,7 +26,6 @@ collection = db.users
 
 # collection.create_index([('user_id', 'text')], unique=True)
 
-
 @app.route("/register", methods=['POST'])
 def register():
     (username, password, role) = request.json.values()
@@ -44,12 +43,12 @@ def register():
     access_token = create_access_token(identity=username)
     return {'id': str(_id), 'access_token': access_token, 'role': role}
 
-
 @app.route("/login", methods=['POST'])
 def login():
-    if (session.get('user_id')):
-        print('already logged in')
-        return {'id': str(session.get('user_id'))}
+    # if (session.get('user_id')):
+    #     print('already logged in')
+    #     return {'id': str(session.get('user_id'))}
+
     (username, password) = request.json.values()
     
     if not username or not password:
@@ -58,13 +57,15 @@ def login():
     found_user=collection.find_one({"user_id": username})
 
     if not found_user:
-        return {'message': 'User not found!'}, 404
+        return {'message': 'User not found!'}
     
     auth=bcrypt.check_password_hash(found_user['password'], password)
     if auth: 
         print('Logged in successfully')
         access_token = create_access_token(identity=username)
         return {'id': str(found_user['user_id']), 'access_token': access_token, 'role': found_user['role']}
+    else:
+        return {'message': "Wrong Password!"}
 
 
 @app.route("/protected", methods=["GET"])

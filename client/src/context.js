@@ -7,7 +7,7 @@ export const RoleProvider = ({ children }) => {
     setRole(role);
   };
   const data = [role, handleRole];
-  return <RoleContext.Provider value={data}>{children} </RoleContext.Provider>;
+  return <RoleContext.Provider value={data}> {children} </RoleContext.Provider>;
 };
 
 export const useRole = () => {
