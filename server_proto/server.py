@@ -6,16 +6,21 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
 bcrypt=Bcrypt(app)
 CORS(app)
 
+load_dotenv()
+db_username=os.environ.get('db_username')
+db_password=os.environ.get('db_password')
 
 app.config['SECRET_KEY']='chickenmutton'
 jwt=JWTManager(app)
 
-client = pymongo.MongoClient(f"mongodb+srv://admin:admin@cluster0.t20dd.mongodb.net/classroom_allocation?retryWrites=true&w=majority")
+client = pymongo.MongoClient(f"mongodb+srv://{db_username}:{db_password}@cluster0.t20dd.mongodb.net/classroom_allocation?retryWrites=true&w=majority")
 db = client.classroom_allocation
 collection = db.users
 
