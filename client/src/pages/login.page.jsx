@@ -35,7 +35,7 @@ export default function LoginPage() {
     const { username, password, role } = state;
     !registerFlag
       ? axios
-          .post("http://localhost:5000/login", { username, password })
+          .post("https://prjm.srikar.tech/login", { username, password })
           .then((token) => {
             console.log(token);
             if ("access_token" in token.data) {
@@ -55,7 +55,7 @@ export default function LoginPage() {
             }
           })
       : axios
-          .post("http://localhost:5000/register", {
+          .post("https://prjm.srikar.tech/register", {
             username,
             password,
             role,
