@@ -5,9 +5,7 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
-
 import uuid
-import json
 
 app = Flask(__name__)
 bcrypt=Bcrypt(app)
@@ -109,32 +107,31 @@ def user_alloc_room():
 			for date in date_data:
 				if user_params["date"] in date.keys():
 					col_room_allocs.delete_one(date)
-					print(date)
-					# TODO: Append to the existing date!
 					
 					new_entry = {
-						user_params["slot"]:
-						{
-							user_params["room"]: {
-								'available': False,
-								'assignedTo': user_params['username'],
-								'requestID': str(uuid.uuid4())[:8]
-							}
+						user_params["room"]: {
+							'available': False,
+							'assignedTo': user_params['username'],
+							'requestID': str(uuid.uuid4())[:8]
 						}
 					}
 
 					updated_schdl = {
-						user_params["date"]: []
+						user_params["date"]: {}
 					}
 
-					updated_schdl[user_params["date"]].append(date)
-					updated_schdl[user_params["date"]].append(new_entry)
-					print(updated_schdl)
+					# Old keys
+					for key in date:
+						if key != "_id":
+							for sub_key in date[key]:
+								updated_schdl[user_params["date"]][sub_key] = date[key][sub_key]
 
-					# print(json.dumps(updated_schdl, indent = 1))
+					# updated_schdl[user_params["date"]][date["slot"]]
+					updated_schdl[user_params["date"]][user_params["slot"]] = new_entry
+					
+					col_room_allocs.insert_one(updated_schdl)
 
 					break
-			# col_room_allocs.delete_one()
 
 	except Exception as e:
 		print(f"something bad happened: {e}")
