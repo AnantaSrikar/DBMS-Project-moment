@@ -183,3 +183,26 @@ def make_req():
 	
 	except:
 		return jsonify({"message": "Missing params!"}), 400
+
+@app.route("/user/requests", methods=["GET"])
+@jwt_required()
+def get_all_reqs():
+	current_user = get_jwt_identity()
+	user_params = request.json
+
+	try:
+		all_user_reqs = col_room_reqs.find({"username" : user_params["username"]})
+
+		user_reqs = {}
+
+		for entry in all_user_reqs:
+			user_reqs[entry["requestID"]] = {
+				"slot": entry["slot"],
+				"date": entry["date"],
+				"room": entry["room"]
+			}
+
+		return jsonify(user_reqs)
+	
+	except:
+		return jsonify({"message": "Missing params!"}), 400
