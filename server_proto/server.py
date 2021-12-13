@@ -14,9 +14,11 @@ app.config['SECRET_KEY']='chickenmutton'
 jwt=JWTManager(app)
 
 client = pymongo.MongoClient('localhost', 27017)
+
 db = client.classroom_allocation
 collection = db.users
 col_room_allocs = db.room_allocs
+col_room_reqs = db.room_reqs
 
 # collection.create_index([('user_id', 'text')], unique=True)
 
@@ -69,7 +71,7 @@ def protected():
 	current_user = get_jwt_identity()
 	return {'logged_in_as': current_user}, 200
 
-@app.route("/schedule", methods=["POST"])
+@app.route("/schedule", methods=["GET"])
 def get_schedule():
 	try:
 		schedule = col_room_allocs.find()
@@ -85,6 +87,11 @@ def get_schedule():
 
 	except:
 		return jsonify({"message": "Something bad happened :("}), 400
+
+@app.route("/schedule", methods=["POST"])
+def get_filtered_schedule():
+	# TODO: implement this 
+	return jsonify({"message": "Test works, ez :)"})
 
 @app.route("/user/alloc_room", methods=["POST"])
 def user_alloc_room():
@@ -119,7 +126,7 @@ def user_alloc_room():
 						user_params["room"]: {
 							'available': False,
 							'assignedTo': user_params['username'],
-							'requestID': str(uuid.uuid4())[:8]
+							'requestID': user_params["requestID"]
 						}
 					}
 
@@ -133,7 +140,6 @@ def user_alloc_room():
 							for sub_key in date[key]:
 								updated_schdl[user_params["date"]][sub_key] = date[key][sub_key]
 
-					# updated_schdl[user_params["date"]][date["slot"]]
 					updated_schdl[user_params["date"]][user_params["slot"]] = new_entry
 					
 					col_room_allocs.insert_one(updated_schdl)
@@ -146,6 +152,34 @@ def user_alloc_room():
 
 	return jsonify({"message": "Test works, ez :)"})
 
-@app.route("/user/view_alloc", methods=["POST"])
-def user_view_alloc():
-	return jsonify({"message": "Test works, ez :)"})
+@app.route("/user/requests", methods=["POST"])
+@jwt_required()
+def make_req():
+	current_user = get_jwt_identity()
+	user_params = request.json
+
+	try:
+		keys = ["username", "access_token", "room", "slot", "date"]
+
+		for key in keys:
+			if key not in user_params.keys():
+				return jsonify({"message": "Missing params!"}), 400
+
+		user_params["requestID"] = str(uuid.uuid4())[:8]
+		
+		col_room_reqs.insert_one(user_params)
+		all_user_reqs = col_room_reqs.find({"username" : user_params["username"]})
+
+		user_reqs = {}
+
+		for entry in all_user_reqs:
+			user_reqs[entry["requestID"]] = {
+				"slot": entry["slot"],
+				"date": entry["date"],
+				"room": entry["room"]
+			}
+
+		return jsonify(user_reqs)
+	
+	except:
+		return jsonify({"message": "Missing params!"}), 400
