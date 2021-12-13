@@ -69,15 +69,22 @@ def protected():
 	current_user = get_jwt_identity()
 	return {'logged_in_as': current_user}, 200
 
-@app.route("/user/check_alloc", methods=["POST"])
-def user_check_alloc():
-	user_params = request.json
+@app.route("/schedule", methods=["POST"])
+def get_schedule():
+	try:
+		schedule = col_room_allocs.find()
 
-	# try:
-	# 	user_params["date"]
-	# except:
-	# 	return jsonify({"message": "Missing params, try again!"}), 400
-	return jsonify({"message": "Test works, ez :)"})
+		all_schedules = {}
+
+		for date in list(schedule):
+			for key in date.keys():
+				if key != "_id":
+					all_schedules[key] = date[key]
+
+		return jsonify(all_schedules)
+
+	except:
+		return jsonify({"message": "Something bad happened :("}), 400
 
 @app.route("/user/alloc_room", methods=["POST"])
 def user_alloc_room():
