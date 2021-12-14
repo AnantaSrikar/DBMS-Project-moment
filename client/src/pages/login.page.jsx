@@ -72,6 +72,8 @@ export default function LoginPage() {
                                   login: true,
                                   token: token.data.access_token,
                                   role: token.data.role,
+                                  username
+                                  // TODO !critical add username here
                               })
                           );
                           handleRole(token.data.role);

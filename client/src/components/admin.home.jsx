@@ -30,7 +30,7 @@ const AdminHome = () => {
                 }
             );
             let history=[]
-            Object.keys(api_hist.data).forEach(h=>history.push({requestID: api_hist.data[h].requestID, date: api_hist.data[h].date, room:api_hist.data[h].room, slot: api_hist.data[h].slot, status: api_hist.data[h].status}))
+            Object.keys(api_hist.data).forEach(h=>history.push({requestID: api_hist.data[h].requestID, date: api_hist.data[h].date, room:api_hist.data[h].room, slot: api_hist.data[h].slot, status: api_hist.data[h].status, requestor:api_hist.data[h].username }))
             const pr=history.filter(r=>r.status==='pending')
             setPendingReqs(pr)
             history=history.filter(r=>r.status!=='pending')

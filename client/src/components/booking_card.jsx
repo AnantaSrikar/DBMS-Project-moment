@@ -78,7 +78,7 @@ const BookingCard = (props) => {
         if (res.message){
             props.setFailed(true)
         }
-        setClassList(res)
+        setClassList(res.data)
         setApplied(true)
         setDate(date)
         setSlot(slot)
@@ -172,7 +172,8 @@ const BookingCard = (props) => {
                                     sx={{ textAlign: "left" }}
                                     disabled={!applied}
                                 >
-                                    {props.classList ? props.classList.map((classroom) => (
+                                    {console.log('CLASSLIST', classList)}
+                                    {classList ? classList.map((classroom) => (
                                         <MenuItem value={classroom}>
                                             {classroom}
                                         </MenuItem>

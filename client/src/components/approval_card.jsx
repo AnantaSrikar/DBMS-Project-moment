@@ -57,8 +57,8 @@ const useStyles = makeStyles(() => ({
 
 const ApprovalCard = (props) => {
     const {username, token} = JSON.parse(localStorage.getItem('login'))
-    const submitDecision = async (d, id, room, date, slot) => {
-        const res = await axios.post('https://prjm.srikar.tech/admin/requests', {decision: d, username, requestID: id, date, slot, room}, {headers: {'Authorization': `Bearer ${token}`}})
+    const submitDecision = async (d, id, room, date, slot, requestor) => {
+        const res = await axios.post('https://prjm.srikar.tech/admin/requests', {decision: d, username: requestor, requestID: id, date, slot, room}, {headers: {'Authorization': `Bearer ${token}`}})
         if (res.message){
             return console.log('error', res.message)
         }
@@ -182,10 +182,10 @@ const ApprovalCard = (props) => {
                                         </span>
                                     </Stack>
                                     <Stack direction="row" spacing={2}>
-                                        <Icon sx={{ color: green[500], borderRadius:'5px'}} className={styles.a_btn} onClick={()=>{submitDecision('accept', r.requestID, r.room, r.date, r.slot)}}>
+                                        <Icon sx={{ color: green[500], borderRadius:'5px'}} className={styles.a_btn} onClick={()=>{submitDecision('accept', r.requestID, r.room, r.date, r.slot, r.requestor)}}>
                                             check
                                         </Icon>
-                                        <Icon sx={{ color: red[500],borderRadius: '5px'}}  className={styles.r_btn} onClick={()=>{submitDecision('reject', r.requestID, r.room, r.date, r.slot)}}>
+                                        <Icon sx={{ color: red[500],borderRadius: '5px'}}  className={styles.r_btn} onClick={()=>{submitDecision('reject', r.requestID, r.room, r.date, r.slot, r.requestor)}}>
                                             close
                                         </Icon>
                                         
