@@ -29,7 +29,7 @@ const StudentHome = () => {
                 }
             );
             let history=[]
-            Object.keys(api_hist.data).forEach(h=>history.push({id: h, date: api_hist.data[h].date, room:api_hist.data[h].room, slot: api_hist.data[h].slot }))
+            Object.keys(api_hist.data).forEach(h=>history.push({requestID: api_hist.data[h].requestID, date: api_hist.data[h].date, room:api_hist.data[h].room, slot: api_hist.data[h].slot }))
             setPastRequests(history);
             let dates = [];
             

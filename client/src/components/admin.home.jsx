@@ -30,10 +30,11 @@ const AdminHome = () => {
                 }
             );
             let history=[]
-            Object.keys(api_hist.data).forEach(h=>history.push({id: h, date: api_hist.data[h].date, room:api_hist.data[h].room, slot: api_hist.data[h].slot, status: api_hist.data[h].status}))
+            Object.keys(api_hist.data).forEach(h=>history.push({requestID: api_hist.data[h].requestID, date: api_hist.data[h].date, room:api_hist.data[h].room, slot: api_hist.data[h].slot, status: api_hist.data[h].status}))
             const pr=history.filter(r=>r.status==='pending')
             setPendingReqs(pr)
             history=history.filter(r=>r.status!=='pending')
+            console.log('HISTORY', history)
             setPastRequests(history);
             let dates = [];
 
@@ -77,7 +78,7 @@ const AdminHome = () => {
                     <ApprovalCard pendingReqs={pendingReqs} setPastRequests={setPastRequests} />
                 </Grid>
             </Grid>
-            <div style={{ marginLeft: "60px", marginRight: "100px" }}>
+            <div style={{margin: 'auto', width: '90%' }}>
                 <HistoryCard history={pastRequests}/>
             </div>
         </Stack>

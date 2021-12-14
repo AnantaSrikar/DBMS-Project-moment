@@ -61,7 +61,9 @@ const BookingCard = (props) => {
         if (res.message) {
             props.setFailed(true)
         }
-        props.setPastRequests(res)
+        let history=[]
+        Object.keys(res.data).forEach(h=>history.push({id: h, date: res.data[h].date, room:res.data[h].room, slot: res.data[h].slot }))
+        props.setPastRequests(history)
         setClassList([])
         setRoom('dis')
         setApplied(false)
@@ -71,14 +73,14 @@ const BookingCard = (props) => {
     };
 
     const filterSchedule = async ({date, minCap, slot}) => {
-        // const res = await axios.post('https://prjm.srikar.tech/schedule', {date, minCap, slot})
-        // if (res.message){
-        //     props.setFailed(true)
-        // }
-        // setClassList(res)
-        // setApplied(true)
-        // setDate(date)
-        // setSlot(slot)
+        const res = await axios.post('https://prjm.srikar.tech/schedule', {date, minCap, slot})
+        if (res.message){
+            props.setFailed(true)
+        }
+        setClassList(res)
+        setApplied(true)
+        setDate(date)
+        setSlot(slot)
     }
 
     return (
