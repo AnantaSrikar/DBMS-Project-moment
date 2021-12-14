@@ -17,9 +17,9 @@ client = pymongo.MongoClient('localhost', 27017)
 
 db = client.classroom_allocation
 collection = db.users
-col_room_allocs = db.room_allocs
 col_room_reqs = db.room_reqs
 col_schedule = db.schedule
+col_rooms = db.rooms
 
 @app.route("/register", methods=['POST'])
 def register():
@@ -72,7 +72,7 @@ def protected():
 
 @app.route("/user/requests", methods=["POST"])
 @jwt_required()
-def make_req():	# TODO: isAccepted
+def make_req():	# TODO: Add purpose
 	current_user = get_jwt_identity()
 	user_params = request.json
 
@@ -111,10 +111,9 @@ def make_req():	# TODO: isAccepted
 @jwt_required()
 def get_all_reqs():
 	current_user = get_jwt_identity()
-	user_params = request.json	# TODO: Change to params
 
 	try:
-		all_user_reqs = col_room_reqs.find({"username" : user_params["username"]})
+		all_user_reqs = col_room_reqs.find({"username" : request.args["username"]})
 
 		user_reqs = {}
 
@@ -153,8 +152,32 @@ def get_schedule():
 # Route to check for free classrooms as per request
 @app.route("/schedule", methods=["POST"])
 def get_filtered_schedule():
-	# TODO: implement this using schedule table and goto rooms table for capacity, return all classrooms
-	return jsonify({"message": "Test works, ez :)"})
+	user_params = request.json
+
+	keys = ["minCap", "date", "slot"]
+
+	for key in keys:
+		if key not in user_params.keys():
+			return jsonify({"message": "Missing params!"}), 400
+
+	try:
+		free_rooms = []
+		# Haha car go vroom vroom
+		v_rooms = col_rooms.find({"capacity": {"$gte": user_params["minCap"]}})
+		
+		date_schdl = col_schedule.find_one({"date": user_params["date"]})
+		
+		if not date_schdl:
+			return jsonify({"message": "Allocations are yet to be done for that day!"}), 400
+
+		for slot in date_schdl["slots"]:
+			if slot["time"] == user_params["slot"] and slot["available"]:
+				free_rooms.append(slot["classroom"])
+
+		return jsonify(free_rooms)
+	
+	except Exception as e:
+			return jsonify({"message": f"Something bad happened: {e}"})
 
 @app.route("/admin/requests", methods=["POST"])
 def get_admin_approval():
