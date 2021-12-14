@@ -1,7 +1,7 @@
 {
   "name": "client",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "dependencies": {
     "@date-io/luxon": "^2.11.1",
     "@date-io/moment": "^2.11.0",

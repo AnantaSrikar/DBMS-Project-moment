@@ -82,9 +82,9 @@ export default function LoginPage() {
                   });
     };
 
-    const handleText = (e) => {
-        setState({ [e.target.name]: e.target.value });
-    };
+  const handleText = (e) => {
+    setState({ [e.target.name]: e.target.value });
+  };
 
     const modal_style = {
         position: "absolute",
