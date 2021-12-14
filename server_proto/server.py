@@ -19,8 +19,7 @@ db = client.classroom_allocation
 collection = db.users
 col_room_allocs = db.room_allocs
 col_room_reqs = db.room_reqs
-
-# collection.create_index([('user_id', 'text')], unique=True)
+col_schedule = db.schedule
 
 @app.route("/register", methods=['POST'])
 def register():
@@ -71,30 +70,89 @@ def protected():
 	current_user = get_jwt_identity()
 	return {'logged_in_as': current_user}, 200
 
+@app.route("/user/requests", methods=["POST"])
+@jwt_required()
+def make_req():	# TODO: isAccepted
+	current_user = get_jwt_identity()
+	user_params = request.json
+
+	try:
+		keys = ["username", "room", "slot", "date"]
+
+		for key in keys:
+			if key not in user_params.keys():
+				return jsonify({"message": "Missing params!"}), 400
+
+		user_params["requestID"] = str(uuid.uuid4())[:8]
+		
+		col_room_reqs.insert_one(user_params)
+		all_user_reqs = col_room_reqs.find({"username" : user_params["username"]})
+
+		user_reqs = {}
+
+		for entry in all_user_reqs:
+			user_reqs[entry["requestID"]] = {
+				"slot": entry["slot"],
+				"date": entry["date"],
+				"room": entry["room"]
+			}
+
+		return jsonify(user_reqs)
+	
+	except:
+		return jsonify({"message": "Missing params!"}), 400
+
+@app.route("/user/requests", methods=["GET"])
+@jwt_required()
+def get_all_reqs():
+	current_user = get_jwt_identity()
+	user_params = request.json	# TODO: Change to params
+
+	try:
+		all_user_reqs = col_room_reqs.find({"username" : user_params["username"]})
+
+		user_reqs = {}
+
+		for entry in all_user_reqs:
+			user_reqs[entry["requestID"]] = {
+				"slot": entry["slot"],
+				"date": entry["date"],
+				"room": entry["room"]
+			}
+
+		return jsonify(user_reqs)
+	
+	except:
+		return jsonify({"message": "Missing params!"}), 400
+
+# Route to get ALL the schedules
 @app.route("/schedule", methods=["GET"])
 def get_schedule():
 	try:
-		schedule = col_room_allocs.find()
+		schedule = col_schedule.find()
 
-		all_schedules = {}
+		all_schedules = []
 
 		for date in list(schedule):
+			row = {}
 			for key in date.keys():
 				if key != "_id":
-					all_schedules[key] = date[key]
+					row[key] = date[key]
+			all_schedules.append(row)
 
 		return jsonify(all_schedules)
 
 	except:
 		return jsonify({"message": "Something bad happened :("}), 400
 
+# Route to check for free classrooms as per request
 @app.route("/schedule", methods=["POST"])
 def get_filtered_schedule():
-	# TODO: implement this 
+	# TODO: implement this using schedule table and goto rooms table for capacity, return all classrooms
 	return jsonify({"message": "Test works, ez :)"})
 
-@app.route("/user/alloc_room", methods=["POST"])
-def user_alloc_room():
+@app.route("/admin/requests", methods=["POST"])
+def get_admin_approval():
 	user_params = request.json
 	
 	try:
@@ -152,57 +210,7 @@ def user_alloc_room():
 
 	return jsonify({"message": "Test works, ez :)"})
 
-@app.route("/user/requests", methods=["POST"])
-@jwt_required()
-def make_req():
-	current_user = get_jwt_identity()
-	user_params = request.json
-
-	try:
-		keys = ["username", "access_token", "room", "slot", "date"]
-
-		for key in keys:
-			if key not in user_params.keys():
-				return jsonify({"message": "Missing params!"}), 400
-
-		user_params["requestID"] = str(uuid.uuid4())[:8]
-		
-		col_room_reqs.insert_one(user_params)
-		all_user_reqs = col_room_reqs.find({"username" : user_params["username"]})
-
-		user_reqs = {}
-
-		for entry in all_user_reqs:
-			user_reqs[entry["requestID"]] = {
-				"slot": entry["slot"],
-				"date": entry["date"],
-				"room": entry["room"]
-			}
-
-		return jsonify(user_reqs)
-	
-	except:
-		return jsonify({"message": "Missing params!"}), 400
-
-@app.route("/user/requests", methods=["GET"])
-@jwt_required()
-def get_all_reqs():
-	current_user = get_jwt_identity()
-	user_params = request.json
-
-	try:
-		all_user_reqs = col_room_reqs.find({"username" : user_params["username"]})
-
-		user_reqs = {}
-
-		for entry in all_user_reqs:
-			user_reqs[entry["requestID"]] = {
-				"slot": entry["slot"],
-				"date": entry["date"],
-				"room": entry["room"]
-			}
-
-		return jsonify(user_reqs)
-	
-	except:
-		return jsonify({"message": "Missing params!"}), 400
+@app.route("/admin/requests", methods=["GET"])
+def get_admin_requests():
+	# TODO: return all
+	return jsonify({"message": "Test works, ez :)"})
