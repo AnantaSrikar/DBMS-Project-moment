@@ -5,21 +5,18 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RoleProvider } from "./context";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import AdapterDateFns from "@mui/lab/AdapterLuxon";
-import { useState } from "react";
+import HelpPage from "./pages/help.page";
 
 function App() {
-    const chickenmuttonfn = (num) => {
-      console.log('chickenmuttonfn'+num)
-    }
-    const [c, setC] = useState('')
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <RoleProvider>
                 <div className="App">
                     <BrowserRouter>
                         <Routes>
-                            <Route path="/login" element={<LoginPage setC={setC}/>} />
-                            <Route path="/" element={<HomePage chickenmutton={chickenmuttonfn} setC={setC} c={c}/>} />
+                            <Route path="/login" element={<LoginPage/>} />
+                            <Route path="/" element={<HomePage/>} />
+                            <Route path='/help' element={<HelpPage />}></Route>
                         </Routes>
                     </BrowserRouter>
                 </div>

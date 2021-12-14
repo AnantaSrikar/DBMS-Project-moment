@@ -6,9 +6,6 @@ import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Check from "@mui/icons-material/Check";
-import SettingsIcon from "@mui/icons-material/Settings";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
-import VideoLabelIcon from "@mui/icons-material/VideoLabel";
 import StepConnector, {
     stepConnectorClasses,
 } from "@mui/material/StepConnector";
@@ -105,7 +102,6 @@ export default function CustomizedSteppers(props) {
             >
                 {labels.map((label, i) => (
                     <Step key={label}>
-                        {console.log("labels", logs[i])}
                         <StepLabel StepIconComponent={QontoStepIcon}>
                             <span style={{ fontSize: "12px" }}>{`${label} ${
                                 logs[i]

@@ -1,13 +1,10 @@
 import { Card, Grid, Paper, Stack, Typography } from "@mui/material";
 import React from "react";
-import { makeStyles, styled } from "@mui/styles";
-import CustomizedSteppers from "./status_stepper";
+import { makeStyles } from "@mui/styles";
 import { DateTime } from "luxon";
-import { useTheme } from "@emotion/react";
-import { blue, blueGrey, green, grey, red, teal } from "@mui/material/colors";
-import Button from "@mui/material/Button";
-import CheckIcon from "@mui/icons-material/Check";
+import { blueGrey, green, red, teal } from "@mui/material/colors";
 import Icon from "@mui/material/Icon";
+import axios from "axios";
 
 const useStyles = makeStyles(() => ({
     innerCard: {
@@ -56,28 +53,17 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
-const history = [
-    {
-        requestId: 1,
-        classroomName: "TR1",
-        startTime: DateTime.now(),
-        endTime: DateTime.now().plus({ hour: 1 }),
-        purpose: "Event",
-        logs: [DateTime.now()],
-        creator: "Enigma",
-    },
-    {
-        requestId: 2,
-        classroomName: "LT1",
-        startTime: DateTime.now().minus({ hour: 2 }),
-        endTime: DateTime.now(),
-        purpose: "Aether",
-        logs: [DateTime.now().minus({ hour: 2 }), DateTime.now()],
-        creator: "Erudite",
-    },
-];
 
-const ApprovalCard = () => {
+
+const ApprovalCard = (props) => {
+    const {username, token} = JSON.parse(localStorage.getItem('login'))
+    const submitDecision = async (d, id) => {
+        const res = await axios.post('https://prjm.srikar.tech/admin/requests', {decision: d, username, id}, {headers: {'Authorization': `Bearer ${token}`}})
+        if (res.message){
+            return console.log('error', res.message)
+        }
+        props.setPastRequests(res)
+    }
     const styles = useStyles();
     const gap = { xs: 1, sm: 1.5, lg: 2 };
     return (
@@ -103,7 +89,7 @@ const ApprovalCard = () => {
                     </Paper>
                 </Stack>
                 <Stack spacing={1}>
-                    {history.map((r) => (
+                    {props.pendingReqs.map((r) => (
                         <Card
                             variant="outlined"
                             className={styles.innerCard}
@@ -137,7 +123,7 @@ const ApprovalCard = () => {
                                                 padding: "3px",
                                             }}
                                         >
-                                            {r.classroomName}
+                                            {r.room}
                                         </span>
                                         <span
                                             style={{
@@ -147,7 +133,7 @@ const ApprovalCard = () => {
                                                 padding: "3px",
                                             }}
                                         >
-                                            {r.startTime.toFormat("ccc, LLL d")}
+                                            {r.date}
                                         </span>
                                         <span
                                             style={{
@@ -157,13 +143,7 @@ const ApprovalCard = () => {
                                                 padding: "3px",
                                             }}
                                         >
-                                            {r.startTime.toLocaleString(
-                                                DateTime.TIME_SIMPLE
-                                            ) +
-                                                " - " +
-                                                r.endTime.toLocaleString(
-                                                    DateTime.TIME_SIMPLE
-                                                )}
+                                            {r.slot}
                                         </span>
                                     </Stack>
                                     <Stack direction="row" spacing={2}>
