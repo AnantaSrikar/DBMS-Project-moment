@@ -9,71 +9,15 @@ import {
     Typography,
 } from "@mui/material";
 import React, { useState } from "react";
-import { makeStyles, styled } from "@mui/styles";
-import { DateTime } from "luxon";
+import { makeStyles } from "@mui/styles";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import TimePicker from "@mui/lab/TimePicker";
 import Filters from "./filters";
-import DateTimePicker from "@mui/lab/DateTimePicker";
-
-const classrooms = [
-    {
-        classroomId: 1,
-        location: 0,
-        capacity: 60,
-        availability: true,
-        name: "LT1",
-    },
-    {
-        classroomId: 2,
-        location: 0,
-        capacity: 30,
-        availability: true,
-        name: "TR1",
-    },
-    {
-        classroomId: 3,
-        location: 0,
-        capacity: 120,
-        availability: true,
-        name: "LLT1",
-    },
-    {
-        classroomId: 4,
-        location: 1,
-        capacity: 60,
-        availability: true,
-        name: "LT2",
-    },
-    {
-        classroomId: 5,
-        location: 1,
-        capacity: 30,
-        availability: true,
-        name: "TR2",
-    },
-    {
-        classroomId: 6,
-        location: 1,
-        capacity: 50,
-        availability: true,
-        name: "LH1",
-    },
-    {
-        classroomId: 7,
-        location: 1,
-        capacity: 60,
-        availability: true,
-        name: "SH1",
-    },
-];
+import { useEffect } from "react";
+import axios from "axios";
 
 const useStyles = makeStyles(() => ({
     card: {
@@ -97,25 +41,45 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-const BookingCard = () => {
+const BookingCard = (props) => {
     const styles = useStyles();
-    const [room, setRoom] = useState("");
-    const [startTime, setStartTime] = useState(DateTime.now());
-    const [endTime, setEndTime] = useState(DateTime.now().plus({ hours: 1 }));
+    const [room, setRoom] = useState('dis');
+    const [date, setDate] = useState(props.dateList[0]);
+    const [slot, setSlot] = useState(props.slotList[0]);
+    const [schedule, setSchedule]=useState({})
+    const [classList, setClassList] = useState([])
+    const [applied, setApplied]=useState(false)
+
+    useEffect(()=>{
+        setSchedule(props.schedule)
+    },[])
     const gap = { xs: 1, sm: 1, lg: 1 };
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        // eslint-disable-next-line no-console
-        console.log({
-            email: data.get("email"),
-            password: data.get("password"),
-        });
+        const {username, token, role} = JSON.parse(localStorage.getItem('login'))
+        const res=await axios.post('https://prjm.srikar.tech/user/requests', {username, room, date, slot}, {headers: {'Authorization': `Bearer ${token}`}})
+        if (res.message) {
+            props.setFailed(true)
+        }
+        props.setPastRequests(res)
+        setClassList([])
+        setRoom('dis')
+        setApplied(false)
     };
     const handleChange = (e) => {
-        console.log(e.target);
         setRoom(e.target.value);
     };
+
+    const filterSchedule = async ({date, minCap, slot}) => {
+        // const res = await axios.post('https://prjm.srikar.tech/schedule', {date, minCap, slot})
+        // if (res.message){
+        //     props.setFailed(true)
+        // }
+        // setClassList(res)
+        // setApplied(true)
+        // setDate(date)
+        // setSlot(slot)
+    }
 
     return (
         <Grid item>
@@ -139,7 +103,7 @@ const BookingCard = () => {
                         </Typography>
                     </Paper>
                 </Stack>
-                <Container component="main" maxWidth="xs">
+                <Container component="main" sx={{ width: "100%" }}>
                     <CssBaseline />
                     <Box
                         sx={{
@@ -152,10 +116,47 @@ const BookingCard = () => {
                             component="form"
                             onSubmit={handleSubmit}
                             noValidate
-                            sx={{ mt: 1 }}
+                            sx={{ mt: 1, width:'100%' }}
                         >
-                            <Filters />
-                            <FormControl fullWidth>
+                            <Filters applyFilter={filterSchedule} dateList={props.dateList} slotList={props.slotList}/>
+
+                            {/* <Stack direction="row" my={2} spacing={2}>
+                                <FormControl fullWidth>
+                                    <InputLabel id="date">
+                                        Date
+                                    </InputLabel>
+                                    <Select
+                                        labelId="date"
+                                        id="date"
+                                        value={date || ""}
+                                        label="Date"
+                                        onChange={(e) => {
+                                            setDate(e.target.value);
+                                        }}
+                                        sx={{ textAlign: "left"}}
+                                    >   
+                                    {props.dateList ? props.dateList.map(date=><MenuItem value={date}>{date}</MenuItem>) : null}
+                                    </Select>
+                                </FormControl>
+                                <FormControl fullWidth>
+                                    <InputLabel id="slot">
+                                        Slot
+                                    </InputLabel>
+                                    <Select
+                                        labelId="slot"
+                                        id="slot"
+                                        value={slot || ""}
+                                        label="Slot"
+                                        onChange={(e) => {
+                                            setSlot(e.target.value);
+                                        }}
+                                        sx={{ textAlign: "left" }}
+                                    >
+                                        {props.slotList ? props.slotList.map(slot=><MenuItem value={slot}>{slot}</MenuItem>) : null}
+                                    </Select>
+                                </FormControl>
+                            </Stack> */}
+                            <FormControl fullWidth sx={{mb:2}}>
                                 <InputLabel id="demo-simple-select-label">
                                     Room
                                 </InputLabel>
@@ -166,36 +167,16 @@ const BookingCard = () => {
                                     label="Room"
                                     onChange={handleChange}
                                     sx={{ textAlign: "left" }}
+                                    disabled={!applied}
                                 >
-                                    {classrooms.map((classroom) => (
-                                        <MenuItem value={classroom.classroomId}>
-                                            {classroom.name}
+                                    {props.classList ? props.classList.map((classroom) => (
+                                        <MenuItem value={classroom}>
+                                            {classroom}
                                         </MenuItem>
-                                    ))}
+                                    )):null}
+                                    {!applied ? <MenuItem value='dis'>Please apply the filter first</MenuItem>:null}
                                 </Select>
                             </FormControl>
-                            <Stack direction="row" my={3} spacing={2}>
-                                <DateTimePicker
-                                    renderInput={(props) => (
-                                        <TextField {...props} />
-                                    )}
-                                    label="Start date/time"
-                                    value={startTime}
-                                    onChange={(newValue) => {
-                                        setStartTime(newValue);
-                                    }}
-                                />
-                                <DateTimePicker
-                                    renderInput={(props) => (
-                                        <TextField {...props} />
-                                    )}
-                                    label="End date/time"
-                                    value={endTime}
-                                    onChange={(newValue) => {
-                                        setEndTime(newValue);
-                                    }}
-                                />
-                            </Stack>
                             <TextField
                                 id="outlined-multiline-static"
                                 label="Purpose"

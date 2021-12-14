@@ -1,9 +1,10 @@
 import { Card, Grid, Paper, Stack, Typography } from "@mui/material";
 import React from "react";
-import { makeStyles, styled } from "@mui/styles";
+import { makeStyles } from "@mui/styles";
 import CustomizedSteppers from "./status_stepper";
 import { DateTime } from "luxon";
-import { useTheme } from "@emotion/react";
+import { useRole } from "../context";
+import { green, red, yellow } from "@mui/material/colors";
 
 const useStyles = makeStyles(() => ({
     innerCard: {
@@ -19,8 +20,7 @@ const useStyles = makeStyles(() => ({
         borderColor: "#E7EDF3",
         borderRadius: 8,
         transition: "0.4s",
-        height: "300px",
-        overflowY: "scroll",
+        marginBottom: "30px",
     },
     root: { paddingBottom: 0 },
     title: {
@@ -35,32 +35,16 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-const history = [
-    {
-        requestId: 1,
-        classroomName: "TR1",
-        startTime: DateTime.now(),
-        endTime: DateTime.now().plus({ hour: 1 }),
-        purpose: "Event",
-        logs: [DateTime.now()],
-    },
-    {
-        requestId: 2,
-        classroomName: "LT1",
-        startTime: DateTime.now().minus({ hour: 2 }),
-        endTime: DateTime.now(),
-        purpose: "Aether",
-        logs: [DateTime.now().minus({ hour: 2 }), DateTime.now()],
-    },
-];
-
-const HistoryCard = () => {
+const HistoryCard = (props) => {
+    console.log(props.history);
+    const [role, handleRole] = useRole();
     const styles = useStyles();
     const gap = { xs: 1, sm: 1.5, lg: 2 };
     return (
         <Grid item>
             <Stack
                 className={styles.card}
+                sx={{ height: "100%" }}
                 p={{ xs: 0.5, sm: 0.75, lg: 1 }}
                 gap={gap}
             >
@@ -80,7 +64,7 @@ const HistoryCard = () => {
                     </Paper>
                 </Stack>
                 <Stack spacing={1}>
-                    {history.map((r) => (
+                    {props.history.map((r) => (
                         <Card
                             variant="outlined"
                             className={styles.innerCard}
@@ -94,24 +78,39 @@ const HistoryCard = () => {
                                     padding: "10px",
                                 }}
                             >
-                                <b>Request #{r.requestId}</b>
+                                <b>Request #{r.id}</b>
                             </Typography>
-                            <Typography
-                                className={styles.subheader}
-                                sx={{ margin: "10px", marginBottom: "20px" }}
+                            <Stack
+                                direction="row"
+                                justifyContent="space-between"
                             >
-                                {r.startTime.toFormat("ccc, LLL d") +
-                                    " [" +
-                                    r.startTime.toLocaleString(
-                                        DateTime.TIME_SIMPLE
-                                    ) +
-                                    " - " +
-                                    r.endTime.toLocaleString(
-                                        DateTime.TIME_SIMPLE
-                                    ) +
-                                    "]"}
-                            </Typography>
-                            <CustomizedSteppers logs={r.logs} />
+                                <Typography
+                                    className={styles.subheader}
+                                    sx={{ fontWeight: 'bold', margin: "10px", padding: '10px', paddingLeft: '0' }}
+                                >
+                                    {r.date + " [" + r.slot + "]"}
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        backgroundColor:
+                                            r.status === "pending"
+                                                ? yellow[500]
+                                                : r.status === "rejected"
+                                                ? red[500]
+                                                : green[500],
+                                         color:
+                                            r.status === "pending"
+                                                ? yellow[50]
+                                                : r.status === "rejected"
+                                                ? red[50]
+                                                : green[50],
+                                        padding: '10px',
+                                        margin: '10px',
+                                        borderRadius: '5px'
+                                    }}
+                                >pending</Typography>
+                            </Stack>
+                            {/* <CustomizedSteppers logs={r.logs} /> */}
                         </Card>
                     ))}
                 </Stack>

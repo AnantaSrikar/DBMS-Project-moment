@@ -9,32 +9,32 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import userImage from "../images/user.png";
+import { useNavigate } from "react-router-dom";
 
 const pages = ["Home", "Help"];
-const settings = ["Logout"];
 
 const NavBar = () => {
+    const navigate=useNavigate()
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
 
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
     };
-    const handleOpenUserMenu = (event) => {
-        setAnchorElUser(event.currentTarget);
-    };
 
     const handleCloseNavMenu = () => {
+        localStorage.removeItem('login')
+        navigate('/login')
         setAnchorElNav(null);
     };
 
-    const handleCloseUserMenu = () => {
-        setAnchorElUser(null);
-    };
 
+    const handleNavigate = (page) => {
+        const route = page==='Home' ? '/':page
+        navigate(route)
+    } 
     return (
         <AppBar position="static" sx={{ px: "0" }}>
             <Container maxWidth="100%">
@@ -76,7 +76,7 @@ const NavBar = () => {
                             {pages.map((page) => (
                                 <MenuItem
                                     key={page}
-                                    onClick={handleCloseNavMenu}
+                                    onClick={()=>handleNavigate(page)}
                                 >
                                     <Typography textAlign="center">
                                         {page}
@@ -105,7 +105,7 @@ const NavBar = () => {
                         {pages.map((page) => (
                             <Button
                                 key={page}
-                                onClick={handleCloseNavMenu}
+                                onClick={()=>handleNavigate(page)}
                                 sx={{ my: 2, color: "white", display: "block" }}
                             >
                                 {page}
@@ -113,42 +113,19 @@ const NavBar = () => {
                         ))}
                     </Box>
 
-                    <Box sx={{ flexGrow: 0 }}>
-                        <Tooltip title="Open settings">
+                    <Box sx={{ flexGrow: 0, display: 'flex', flexDirection: 'row' }}>
+                        <Typography component="div" sx={{mt:"4px", mr: '5px'}}>
+                            {JSON.parse(localStorage.getItem('login')).username}
+                        </Typography>
+                       
                             <IconButton
-                                onClick={handleOpenUserMenu}
+                                onClick={handleCloseNavMenu}
                                 sx={{ p: 0 }}
                             >
-                                <Avatar alt="Remy Sharp" src={userImage} />
+                                <Avatar alt="Remy Sharp" sx={{ width: 30, height: 30 }} src={userImage} />
                             </IconButton>
-                        </Tooltip>
-                        <Menu
-                            sx={{ mt: "45px" }}
-                            id="menu-appbar"
-                            anchorEl={anchorElUser}
-                            anchorOrigin={{
-                                vertical: "top",
-                                horizontal: "right",
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: "top",
-                                horizontal: "right",
-                            }}
-                            open={Boolean(anchorElUser)}
-                            onClose={handleCloseUserMenu}
-                        >
-                            {settings.map((setting) => (
-                                <MenuItem
-                                    key={setting}
-                                    onClick={handleCloseNavMenu}
-                                >
-                                    <Typography textAlign="center">
-                                        {setting}
-                                    </Typography>
-                                </MenuItem>
-                            ))}
-                        </Menu>
+                       
+
                     </Box>
                 </Toolbar>
             </Container>

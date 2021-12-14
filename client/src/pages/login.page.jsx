@@ -12,7 +12,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Modal, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useSetState } from "react-use";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -26,42 +26,46 @@ export default function LoginPage() {
         username: "",
         password: "",
         role: "student",
+        name: "",
+        rollno: "",
     });
     const [_, handleRole] = useRole();
     const navigate = useNavigate();
+    const [fail, setFail] = useState(false);
 
     const handleSubmit = () => {
         const { username, password, role } = state;
         !registerFlag
             ? axios
-                  .post("http://localhost:5000/login", { username, password })
+                  .post("https://prjm.srikar.tech/login", {
+                      username,
+                      password,
+                  })
                   .then((token) => {
-                      console.log(token);
                       if ("access_token" in token.data) {
-                          console.log(token);
                           localStorage.setItem(
                               "login",
                               JSON.stringify({
                                   login: true,
                                   token: token.data.access_token,
                                   role: token.data.role,
+                                  username
                               })
                           );
                           handleRole(token.data.role);
                           return navigate("/");
                       } else {
-                          //Login failed
+                          setFail(true);
                       }
                   })
             : axios
-                  .post("http://localhost:5000/register", {
+                  .post("https://prjm.srikar.tech/register", {
                       username,
                       password,
                       role,
                   })
                   .then((token) => {
                       if ("access_token" in token.data) {
-                          console.log(token);
                           localStorage.setItem(
                               "login",
                               JSON.stringify({
@@ -73,7 +77,7 @@ export default function LoginPage() {
                           handleRole(token.data.role);
                           return navigate("/");
                       } else {
-                          //Registration failed
+                          setFail(true);
                       }
                   });
     };
@@ -82,8 +86,38 @@ export default function LoginPage() {
         setState({ [e.target.name]: e.target.value });
     };
 
+    const modal_style = {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: 400,
+        bgcolor: "background.paper",
+        border: "2px solid #000",
+        boxShadow: 24,
+        p: 4,
+    };
     return (
         <ThemeProvider theme={theme}>
+            <Modal
+                open={fail}
+                onClose={() => setFail(false)}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={modal_style}>
+                    <Typography
+                        id="modal-modal-title"
+                        variant="h6"
+                        component="h2"
+                    >
+                        Sign in failed
+                    </Typography>
+                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                        Username or password is incorrect
+                    </Typography>
+                </Box>
+            </Modal>
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
                 <Box
@@ -155,6 +189,29 @@ export default function LoginPage() {
                                     autoComplete="current-password"
                                     onChange={handleText}
                                 />
+                                <TextField
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    id="name"
+                                    label="Name"
+                                    name="name"
+                                    autoComplete="name"
+                                    onChange={handleText}
+                                    autoFocus
+                                />
+                                {state.role === "student" ? (
+                                    <TextField
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="rollno"
+                                        label="Roll Number"
+                                        id="rollno"
+                                        autoComplete="rollno"
+                                        onChange={handleText}
+                                    />
+                                ) : null}
                                 <ToggleButtonGroup
                                     color="primary"
                                     value={state.role}

@@ -1,29 +1,21 @@
 import * as React from "react";
 import { styled } from "@mui/material/styles";
-import Card from "@mui/material/Card";
-import CardHeader from "@mui/material/CardHeader";
-import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Collapse from "@mui/material/Collapse";
-import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { pink, blueGrey } from "@mui/material/colors";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import ShareIcon from "@mui/icons-material/Share";
+import { blueGrey } from "@mui/material/colors";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
+    Button,
     FormControl,
     Grid,
     InputLabel,
     MenuItem,
     Paper,
     Select,
-    TextField,
 } from "@mui/material";
-import DateTimePicker from "@mui/lab/DateTimePicker";
 
 const ExpandMore = styled((props) => {
     const { expand, ...other } = props;
@@ -36,22 +28,13 @@ const ExpandMore = styled((props) => {
     }),
 }));
 
-export default function Filters() {
+export default function Filters(props) {
     const [expanded, setExpanded] = React.useState(false);
-    const [value, setValue] = React.useState(new Date());
-    const [loc, setLoc] = React.useState(0);
+    const [value, setValue] = React.useState(props.dateList[0]);
     const [cap, setCap] = React.useState(10);
+    const [slot, setSlot] = React.useState(props.slotList[0]);
     const handleExpandClick = () => {
         setExpanded(!expanded);
-    };
-    const [duration, setDuration] = React.useState(0);
-
-    const handleChange = (event) => {
-        setDuration(event.target.value);
-    };
-
-    const handleLoc = (e) => {
-        setLoc(e.target.value);
     };
 
     const handleCap = (e) => {
@@ -83,54 +66,41 @@ export default function Filters() {
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <CardContent>
                     <Grid container spacing={2} sx={{ textAlign: "left" }}>
-                        <Grid item xs={8}>
-                            <DateTimePicker
-                                renderInput={(props) => (
-                                    <TextField {...props} />
-                                )}
-                                label="Start date/time"
-                                value={value}
-                                onChange={(newValue) => {
-                                    setValue(newValue);
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={4}>
+                        <Grid item xs={6}>
                             <FormControl fullWidth>
                                 <InputLabel id="demo-simple-select-label">
-                                    Minutes
+                                    Date
                                 </InputLabel>
                                 <Select
                                     labelId="demo-simple-select-label"
                                     id="demo-simple-select"
-                                    value={duration}
-                                    label="Duration"
-                                    onChange={handleChange}
+                                    value={value}
+                                    label="Date"
+                                    onChange={(e) => setValue(e.target.value)}
                                 >
-                                    <MenuItem value={10}>Ten</MenuItem>
-                                    <MenuItem value={20}>Twenty</MenuItem>
-                                    <MenuItem value={30}>Thirty</MenuItem>
+                                    {props.dateList?props.dateList.map(d=><MenuItem value={d}>{d}</MenuItem>):null}
                                 </Select>
                             </FormControl>
                         </Grid>
                         <Grid item xs={6}>
                             <FormControl fullWidth>
                                 <InputLabel id="demo-simple-select-label">
-                                    Location
+                                    Time Slot
                                 </InputLabel>
                                 <Select
                                     labelId="demo-simple-select-label"
                                     id="demo-simple-select"
-                                    value={loc}
-                                    label="Location"
-                                    onChange={handleLoc}
+                                    value={slot}
+                                    label="Time Slot"
+                                    onChange={(e) => {
+                                        setSlot(e.target.value);
+                                    }}
                                 >
-                                    <MenuItem value={10}>Ten</MenuItem>
-                                    <MenuItem value={20}>Twenty</MenuItem>
-                                    <MenuItem value={30}>Thirty</MenuItem>
+                                   {props.slotList?props.slotList.map(s=><MenuItem value={s}>{s}</MenuItem>):null}
                                 </Select>
                             </FormControl>
                         </Grid>
+                       
                         <Grid item xs={6}>
                             <FormControl fullWidth>
                                 <InputLabel id="demo-simple-select-label">
@@ -148,6 +118,9 @@ export default function Filters() {
                                     <MenuItem value={30}>Thirty</MenuItem>
                                 </Select>
                             </FormControl>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Button sx={{height: '100%', width: '100%'}} variant='outlined' onClick={()=>props.applyFilter({date: value, minCap: cap, slot})}>Apply</Button>
                         </Grid>
                     </Grid>
                 </CardContent>
