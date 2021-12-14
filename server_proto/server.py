@@ -72,12 +72,12 @@ def protected():
 
 @app.route("/user/requests", methods=["POST"])
 @jwt_required()
-def make_req():	# TODO: Add purpose
+def make_req():
 	current_user = get_jwt_identity()
 	user_params = request.json
 
 	try:
-		keys = ["username", "room", "slot", "date"]
+		keys = ["username", "room", "slot", "date", "purpose"]
 
 		for key in keys:
 			if key not in user_params.keys():
@@ -88,7 +88,9 @@ def make_req():	# TODO: Add purpose
 		# Making sure random data doesn't get into database
 		for key in keys:
 			new_req[key] = user_params[key]
+			
 		new_req["requestID"] = str(uuid.uuid4())[:8]
+		new_req["status"] = "waiting"
 		
 		col_room_reqs.insert_one(new_req)
 		all_user_reqs = col_room_reqs.find({"username" : user_params["username"]})
@@ -182,61 +184,58 @@ def get_filtered_schedule():
 @app.route("/admin/requests", methods=["POST"])
 def get_admin_approval():
 	user_params = request.json
-	
-	try:
-		date_schdl = col_room_allocs.find({user_params["date"]: {"$exists": True}})
 
-		if not list(date_schdl):
-			new_scdl = {
-				user_params["date"]: {
-					user_params["slot"]:
-					{
-						user_params["room"]: {
-							'available': False,
-							'assignedTo': user_params['username'],
-							'requestID': str(uuid.uuid4())[:8]
-						}
-					}
-				}
-			}
-			col_room_allocs.insert_one(new_scdl)
+	keys = ["requestID", "decision", "username"]
+
+	for key in keys:
+		if key not in user_params.keys():
+			return jsonify({"message": "Missing params!"}), 400
+
+	try:
+
+		# Making sure random data doesn't get into database
+		for key in keys:
+			new_req[key] = user_params[key]
+
+		room_req = col_room_reqs.find({"requestID": user_params["requestID"]})
+
+		if user_params["decision"] == "accept":
+			record = col_schedule.find({"date": user_params["date"]})
+			idx = next((i for i, item in enumerate(record['slots']) if item["date"] == date and item['classroom'] == room and item['time'] == slot), None)
+			record[slots[idx]]["available"] = False
+
+			room_req["status"] = "accepted"
 
 		else:
-			date_data = col_room_allocs.find()
-			date_data = list(date_data)
-			for date in date_data:
-				if user_params["date"] in date.keys():
-					col_room_allocs.delete_one(date)
-					
-					new_entry = {
-						user_params["room"]: {
-							'available': False,
-							'assignedTo': user_params['username'],
-							'requestID': user_params["requestID"]
-						}
-					}
+			room_req["status"] = "denied"
 
-					updated_schdl = {
-						user_params["date"]: {}
-					}
+		all_user_reqs_tbl = col_room_reqs.find()
+		all_user_reqs = []
 
-					# Old keys
-					for key in date:
-						if key != "_id":
-							for sub_key in date[key]:
-								updated_schdl[user_params["date"]][sub_key] = date[key][sub_key]
+		for entry in all_user_reqs_tbl:
+			row = {}
+			for key in entry.keys():
+				if key != "_id":
+					row[key] = entry[key]
 
-					updated_schdl[user_params["date"]][user_params["slot"]] = new_entry
-					
-					col_room_allocs.insert_one(updated_schdl)
+			all_user_reqs.append((row))
 
-					break
+
+		schedule = col_schedule.find()
+
+		all_schedules = []
+
+		for date in list(schedule):
+			row = {}
+			for key in date.keys():
+				if key != "_id":
+					row[key] = date[key]
+			all_schedules.append(row)
+
+		return jsonify({"schedule": all_schedules, "requests": all_user_reqs})
 
 	except Exception as e:
-		print(f"something bad happened: {e}")
-		return jsonify({"message": "Missing params!"}), 400
-
-	return jsonify({"message": "Test works, ez :)"})
+		return jsonify({"message": f"Something bad happened: {e}"})
 
 @app.route("/admin/requests", methods=["GET"])
 def get_admin_requests():
