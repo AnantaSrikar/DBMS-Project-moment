@@ -192,7 +192,7 @@ def get_admin_approval():
 			return jsonify({"message": "Missing params!"}), 400
 
 	try:
-
+		new_req={}
 		# Making sure random data doesn't get into database
 		for key in keys:
 			new_req[key] = user_params[key]
@@ -201,8 +201,13 @@ def get_admin_approval():
 
 		if user_params["decision"] == "accept":
 			record = col_schedule.find({"date": user_params["date"]})
-			idx = next((i for i, item in enumerate(record['slots']) if item["date"] == date and item['classroom'] == room and item['time'] == slot), None)
-			record[slots[idx]]["available"] = False
+			idx = next((i for i, item in enumerate(record['slots']) if item['classroom'] == user_params['room'] and item['time'] == user_params['slot']), None)
+			temp = record['slots']
+			temp[idx] = {
+				"available": False,
+				"assignedTo": user_params['username']
+				}
+			col_schedule.update_one({"date": user_params['date']}, {'$set' : {'slots': temp}})
 
 			room_req["status"] = "accepted"
 

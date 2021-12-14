@@ -44,7 +44,7 @@ const HistoryCard = (props) => {
         <Grid item>
             <Stack
                 className={styles.card}
-                sx={{ height: "100%" }}
+                sx={{height: '600px', overflowY: 'scroll'}}
                 p={{ xs: 0.5, sm: 0.75, lg: 1 }}
                 gap={gap}
             >
@@ -64,7 +64,7 @@ const HistoryCard = (props) => {
                     </Paper>
                 </Stack>
                 <Stack spacing={1}>
-                    {props.history.map((r) => (
+                    {props.history?props.history.map((r) => (
                         <Card
                             variant="outlined"
                             className={styles.innerCard}
@@ -78,7 +78,7 @@ const HistoryCard = (props) => {
                                     padding: "10px",
                                 }}
                             >
-                                <b>Request #{r.id}</b>
+                                <b>Request #{r.requestID}</b>
                             </Typography>
                             <Stack
                                 direction="row"
@@ -108,11 +108,11 @@ const HistoryCard = (props) => {
                                         margin: '10px',
                                         borderRadius: '5px'
                                     }}
-                                >pending</Typography>
+                                >{r.status}</Typography>
                             </Stack>
                             {/* <CustomizedSteppers logs={r.logs} /> */}
                         </Card>
-                    ))}
+                    )):null}
                 </Stack>
             </Stack>
         </Grid>
