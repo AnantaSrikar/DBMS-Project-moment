@@ -83,9 +83,14 @@ def make_req():	# TODO: isAccepted
 			if key not in user_params.keys():
 				return jsonify({"message": "Missing params!"}), 400
 
-		user_params["requestID"] = str(uuid.uuid4())[:8]
+		new_req = {}
+
+		# Making sure random data doesn't get into database
+		for key in keys:
+			new_req[key] = user_params[key]
+		new_req["requestID"] = str(uuid.uuid4())[:8]
 		
-		col_room_reqs.insert_one(user_params)
+		col_room_reqs.insert_one(new_req)
 		all_user_reqs = col_room_reqs.find({"username" : user_params["username"]})
 
 		user_reqs = {}
@@ -99,7 +104,7 @@ def make_req():	# TODO: isAccepted
 
 		return jsonify(user_reqs)
 	
-	except:
+	except Exception as e:
 		return jsonify({"message": "Missing params!"}), 400
 
 @app.route("/user/requests", methods=["GET"])
@@ -212,5 +217,18 @@ def get_admin_approval():
 
 @app.route("/admin/requests", methods=["GET"])
 def get_admin_requests():
-	# TODO: return all
-	return jsonify({"message": "Test works, ez :)"})
+	try:
+		all_user_reqs_tbl = col_room_reqs.find()
+		all_user_reqs = []
+
+		for entry in all_user_reqs_tbl:
+			row = {}
+			for key in entry.keys():
+				if key != "_id":
+					row[key] = entry[key]
+
+			all_user_reqs.append((row))
+
+		return jsonify(all_user_reqs)
+	except Exception as e:
+		return jsonify({"message": f"Something bad happened: {e}"})
