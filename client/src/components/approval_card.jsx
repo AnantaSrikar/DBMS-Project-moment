@@ -62,7 +62,42 @@ const ApprovalCard = (props) => {
         if (res.message){
             return console.log('error', res.message)
         }
-        props.setPastRequests(res)
+        const api_hist = res.data.requests
+        let history=[]
+        Object.keys(api_hist).forEach(h=>history.push({requestID: api_hist[h].requestID, date: api_hist[h].date, room:api_hist[h].room, slot: api_hist[h].slot, status: api_hist[h].status}))
+        const pr=history.filter(r=>r.status==='pending')
+        props.setPendingReqs(pr)
+        history=history.filter(r=>r.status!=='pending')
+        console.log('HISTORY', history)
+        props.setPastRequests(history);
+        const api_sched=res.data.schedule
+        let dates = [];
+        api_sched.forEach((item) => dates.push(item.date));
+        let processedData = {};
+        dates.forEach((date) => (processedData[date] = {}));
+        api_sched.forEach(({ date, slots }) => {
+            slots.forEach((slotObj) => {
+                const { time, assignedTo, available, classroom } = slotObj;
+                if (time==='5:00PM-6:00PM'){
+                    return
+                }
+                if (!processedData[date][time]) {
+                    processedData[date][time] = {}
+                }
+                processedData[date][time][classroom] = {
+                    assignedTo,
+                    available,
+                };
+            });
+        });
+        let classes = Object.keys(
+            Object.values(Object.values(processedData)[0])[0]
+        );
+        classes=classes.map(x=>x.toUpperCase())
+        console.log(processedData);
+        props.setSchedule(processedData);
+        props.setDateList(dates)
+        props.setClassList(classes)
     }
     const styles = useStyles();
     const gap = { xs: 1, sm: 1.5, lg: 2 };

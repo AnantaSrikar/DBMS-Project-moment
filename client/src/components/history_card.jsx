@@ -36,7 +36,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 const HistoryCard = (props) => {
-    console.log(props.history);
+    console.log('HISTORY', props.history);
     const [role, handleRole] = useRole();
     const styles = useStyles();
     const gap = { xs: 1, sm: 1.5, lg: 2 };
@@ -100,7 +100,7 @@ const HistoryCard = (props) => {
                                                 : green[500],
                                          color:
                                             r.status === "pending"
-                                                ? yellow[50]
+                                                ? 'black'
                                                 : r.status === "rejected"
                                                 ? red[50]
                                                 : green[50],
