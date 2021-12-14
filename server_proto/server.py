@@ -200,7 +200,7 @@ def get_admin_approval():
 		room_req = col_room_reqs.find({"requestID": user_params["requestID"]})
 
 		if user_params["decision"] == "accept":
-			record = col_schedule.find({"date": user_params["date"]})
+			record = col_schedule.find_one({"date": user_params["date"]})
 			idx = next((i for i, item in enumerate(record['slots']) if item['classroom'] == user_params['room'] and item['time'] == user_params['slot']), None)
 			temp = record['slots']
 			temp[idx] = {
