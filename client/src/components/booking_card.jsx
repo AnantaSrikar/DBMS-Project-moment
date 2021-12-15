@@ -49,6 +49,7 @@ const BookingCard = (props) => {
     const [schedule, setSchedule]=useState({})
     const [classList, setClassList] = useState([])
     const [applied, setApplied]=useState(false)
+    const [prp, setPrp]=useState('')
 
     useEffect(()=>{
         setSchedule(props.schedule)
@@ -57,12 +58,12 @@ const BookingCard = (props) => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         const {username, token, role} = JSON.parse(localStorage.getItem('login'))
-        const res=await axios.post('https://prjm.srikar.tech/user/requests', {username, room, date, slot}, {headers: {'Authorization': `Bearer ${token}`}})
+        const res=await axios.post('https://prjm.srikar.tech/user/requests', {username, room, date, slot, purpose: prp}, {headers: {'Authorization': `Bearer ${token}`}})
         if (res.message) {
             props.setFailed(true)
         }
         let history=[]
-        Object.keys(res.data).forEach(h=>history.push({id: h, date: res.data[h].date, room:res.data[h].room, slot: res.data[h].slot }))
+        Object.keys(res.data).forEach(h=>history.push({requestID: h, date: res.data[h].date, room:res.data[h].room, slot: res.data[h].slot, status: res.data[h].status }))
         props.setPastRequests(history)
         setClassList([])
         setRoom('dis')
@@ -186,6 +187,7 @@ const BookingCard = (props) => {
                                 rows={3}
                                 placeholder="Enter your reason for requesting the room..."
                                 sx={{ width: "100%" }}
+                                onChange={(e)=>setPrp(e.target.value)}
                             />
                             <Button
                                 type="submit"

@@ -75,7 +75,7 @@ const AdminHome = () => {
                     <TimeTable schedule={schedule} dateList={dateList} classList={classList} />
                 </Grid>
                 <Grid item xs={5}>
-                    <ApprovalCard pendingReqs={pendingReqs} setPastRequests={setPastRequests} />
+                    <ApprovalCard pendingReqs={pendingReqs} setPastRequests={setPastRequests} setPendingReqs={setPendingReqs} setSchedule={setSchedule} setClassList={setClassList} setDateList={setDateList} />
                 </Grid>
             </Grid>
             <div style={{margin: 'auto', width: '90%' }}>
